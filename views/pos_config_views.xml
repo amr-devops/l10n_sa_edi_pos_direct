@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_pos_config_form_zatca" model="ir.ui.view">
+        <field name="name">res.config.form.zatca</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add ZATCA settings section -->
+            <xpath expr="//field[@name='pos_invoice_journal_id']" position="after">
+                <setting string="ZATCA direct Mode" 
+                         help="Enable local generation of simplified invoices with async ZATCA reporting"
+                         invisible="not l10n_sa_is_saudi_company">
+                    <field name="l10n_sa_edi_pos_direct_mode_enabled"/>
+                    
+                    <div class="content-group mt16" invisible="not l10n_sa_edi_pos_direct_mode_enabled">
+                        
+                        <!-- Certificate Status -->
+                        <div class="alert alert-info mt16" role="alert">
+                            <strong>Certificate Status:</strong>
+                            <span invisible="not pos_invoice_journal_id.l10n_sa_production_csid_certificate_id" 
+                                      > ✅ Production Certificate Available</span>
+                                <span invisible="pos_invoice_journal_id.l10n_sa_production_csid_certificate_id" 
+                                      > ⚠️ No Production Certificate</span>
+                        </div>
+                        
+                        
+                        <!-- Journal Status -->
+                        <div class="row mt8">
+                            <div class="col-lg-4 o_light_label">
+                                <label string="Invoice Journal" for="pos_invoice_journal_id"/>
+                            </div>
+                            <div class="col-lg-8">
+                                <span invisible="not pos_invoice_journal_id" 
+                                      >📋 <field name="pos_invoice_journal_id" readonly="1" nolabel="1"/></span>
+                                <span invisible="pos_invoice_journal_id" 
+                                      >❌ No Invoice Journal</span>
+                            </div>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+            
+        </field>
+    </record>
+
+</odoo>
