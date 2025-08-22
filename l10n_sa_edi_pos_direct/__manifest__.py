@@ -4,7 +4,7 @@
 {
     'name': 'Saudi Arabia - POS Direct ZATCA Integration',
     'countries': ['sa'],
-    'version': "18.0.1.0.0",
+    'version': "18.0.1.1.0",
     'category': 'Accounting/Localizations/Point of Sale',
     'summary': """
         Direct ZATCA integration for POS - Local generation with async reporting
@@ -49,6 +49,7 @@ Technical Implementation:
         'point_of_sale._assets_pos': [
             'l10n_sa_edi_pos_direct/static/src/css/*.css',
             'l10n_sa_edi_pos_direct/static/src/overrides/models/*.js',
+            'l10n_sa_edi_pos_direct/static/src/overrides/components/**/*.js',
             'l10n_sa_edi_pos_direct/static/src/overrides/components/**/*.xml',
         ],
     },

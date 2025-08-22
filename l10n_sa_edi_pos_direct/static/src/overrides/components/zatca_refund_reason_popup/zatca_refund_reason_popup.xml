@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="l10n_sa_edi_pos_direct.ZatcaRefundReasonPopup">
+        <Dialog title.translate="ZATCA Refund Reason" size="'md'">
+            <div class="zatca-refund-reason-popup">
+                <!-- Refund Reason Selection -->
+                <div class="mb-3">
+                    <label for="zatca_refund_reason" class="form-label fw-bold">
+                        Refund Reason <span class="text-danger">*</span>
+                        <br/>
+                        <small class="text-muted">سبب الاسترداد</small>
+                    </label>
+                    <select 
+                        class="form-select" 
+                        id="zatca_refund_reason" 
+                        name="l10n_sa_zatca_refund_reason" 
+                        t-model="state.l10n_sa_zatca_refund_reason"
+                        t-on-change="onReasonChange">
+                        <t t-foreach="zatcaRefundReasons" t-as="reason" t-key="reason.value">
+                            <option 
+                                t-att-value="reason.value"
+                                t-att-selected="reason.value === state.l10n_sa_zatca_refund_reason ? 'selected' : undefined">
+                                <t t-out="reason.name"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <t t-set-slot="footer">
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-secondary" t-on-click="cancel">
+                        <i class="fa fa-times me-1"></i>
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" t-on-click="confirm">
+                        <i class="fa fa-check me-1"></i>
+                        Confirm Refund
+                    </button>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

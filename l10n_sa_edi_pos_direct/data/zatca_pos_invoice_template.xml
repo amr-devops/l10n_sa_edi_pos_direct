@@ -37,12 +37,26 @@
                 <cbc:IssueDate t-esc="invoice_data['issue_date']"/>
                 <cbc:IssueTime t-esc="invoice_data['issue_time']"/>
                 
-                <!-- Invoice Type Code for simplified invoices -->
-                <cbc:InvoiceTypeCode name="0200000">388</cbc:InvoiceTypeCode>
+                <!-- Invoice Type Code: 388 = Standard Invoice, 381 = Credit Note (refund) -->
+                <cbc:InvoiceTypeCode name="0200000" t-esc="invoice_data.get('invoice_type_code', 388)"/>
                 
                 <!-- Currency -->
                 <cbc:DocumentCurrencyCode t-esc="invoice_data['currency_code']"/>
                 <cbc:TaxCurrencyCode t-esc="invoice_data['currency_code']"/>
+                
+                <!-- IMPORTANT: OrderReference must come BEFORE BillingReference per UBL 2.1 schema -->
+                <!-- Order reference (if any) -->
+                <cac:OrderReference t-if="invoice_data.get('order_reference')">
+                    <cbc:ID t-esc="invoice_data['order_reference']"/>
+                </cac:OrderReference>
+                
+                <!-- Reference to original order for credit notes (refunds) -->
+                <cac:BillingReference t-if="invoice_data.get('billing_reference')">
+                    <cac:InvoiceDocumentReference>
+                        <cbc:ID t-esc="invoice_data['billing_reference']['id']"/>
+                        <cbc:IssueDate t-esc="invoice_data['billing_reference']['issue_date']"/>
+                    </cac:InvoiceDocumentReference>
+                </cac:BillingReference>
                 
                 <!-- ZATCA Required Additional Document References -->
                 <!-- QR Code (BR-KSA-27) - Note: Will be populated by ZATCA API -->
@@ -111,6 +125,15 @@
                         </cac:PartyLegalEntity>
                     </cac:Party>
                 </cac:AccountingCustomerParty>
+
+                <!-- Payment Means with refund reason (KSA-10 for BR-KSA-17) -->
+                <cac:PaymentMeans>
+                    <cbc:PaymentMeansCode listID="UN/ECE 4461">1</cbc:PaymentMeansCode>
+                    <cbc:PaymentDueDate t-esc="invoice_data['issue_date']"/>
+                    <!-- KSA-10: Refund reason for credit/debit notes (BR-KSA-17) -->
+                    <cbc:InstructionNote t-if="invoice_data.get('refund_reason')" t-esc="invoice_data['refund_reason']['reason_display']"/>
+                    <cbc:PaymentID t-esc="invoice_data['invoice_number']"/>
+                </cac:PaymentMeans>
 
                 <!-- Tax Total for entire invoice (BR-KSA-EN16931-09: only one tax total without subtotals) -->
                 <cac:TaxTotal>

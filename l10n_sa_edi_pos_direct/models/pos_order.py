@@ -38,11 +38,40 @@ class PosOrder(models.Model):
         copy=False
     )
 
+    l10n_sa_zatca_refund_reason = fields.Selection([
+        ('DESC_ERROR', 'Description Error - عيب في الوصف'),
+        ('QTY_ERROR', 'Quantity Error - خطأ في الكمية'),
+        ('PRICE_ERROR', 'Price Error - خطأ في السعر'),
+        ('PRODUCT_DEFECT', 'Product Defect - عطل في المنتج'),
+        ('CUSTOMER_REQUEST', 'Customer Cancellation - إلغاء بطلب العميل'),
+        ('OTHER_REASON', 'Other Reasons - أسباب أخرى'),
+    ], string="ZATCA Refund Reason", copy=False, help="Refund reason code for ZATCA direct mode compliance")
+    
     
     l10n_sa_qr_code_image = fields.Html(
         string="QR Code Image",
         help="QR code as HTML image for display"
     )
+
+    def _l10n_sa_get_refund_reason_for_zatca_xml(self):
+        """
+        Get refund reason information for ZATCA XML generation (direct mode only)
+        This is used in the simplified invoice XML template, not for account.move
+        """
+        if (self._is_refund_order() and self.session_id.config_id.l10n_sa_edi_pos_direct_mode_enabled):
+            if not (self.l10n_sa_zatca_refund_reason ):
+                self.l10n_sa_zatca_refund_reason = 'CUSTOMER_REQUEST'
+                
+            reason_display = dict(self._fields['l10n_sa_zatca_refund_reason'].selection).get(
+                self.l10n_sa_zatca_refund_reason, 
+                self.l10n_sa_zatca_refund_reason
+            )
+            
+            return {
+                'reason_code': self.l10n_sa_zatca_refund_reason,
+                'reason_display': reason_display,
+            }
+        return None
 
     @api.model
     def create(self, vals):
@@ -61,6 +90,44 @@ class PosOrder(models.Model):
     def _is_simplified_invoice(self):
         """Check if this order should generate a simplified invoice (B2C)"""
         return not self.partner_id or self.partner_id.company_type == 'person'
+
+    def _is_refund_order(self):
+        """Check if this is a refund order (has refunded_order_id or negative amount)"""
+        return bool(self.refunded_order_id) or self.amount_total < 0
+
+    def _validate_refund_reason_for_zatca(self):
+        """
+        Validate refund reason for ZATCA compliance (simplified for direct mode)
+        For POS direct mode: requires l10n_sa_zatca_refund_reason
+        """
+        if not self._is_refund_order():
+            return True  # Not a refund, no validation needed
+            
+        # ZATCA compliance check: must have refund reason code
+        return bool(self.l10n_sa_zatca_refund_reason)
+
+    def _get_zatca_invoice_type_code(self):
+        """
+        Get ZATCA invoice type code (similar to l10n_sa_edi._l10n_sa_get_invoice_type)
+        - 381: Credit Note (refund)
+        - 388: Standard Invoice
+        """
+        if self._is_refund_order():
+            return 381  # Credit Note
+        else:
+            return 388  # Standard Invoice
+
+    def _get_zatca_billing_reference_vals(self):
+        """
+        Get billing reference for refund orders (similar to l10n_sa_edi._l10n_sa_get_billing_reference_vals)
+        Required for credit notes to reference original order
+        """
+        if self._is_refund_order() and self.refunded_order_id:
+            return {
+                'id': self.refunded_order_id.pos_reference or self.refunded_order_id.name,
+                'issue_date': self.refunded_order_id.date_order.strftime('%Y-%m-%d'),
+            }
+        return None
 
     
     def _compute_qr_code_image(self,qr_code):
@@ -153,6 +220,16 @@ class PosOrder(models.Model):
         if not self.uuid:
             _logger.error(f"Cannot schedule ZATCA submission for order {self.name} - no UUID")
             return
+        
+        # Enhanced validation for refund orders
+        if self._is_refund_order():
+            if not self._validate_refund_reason_for_zatca():
+                _logger.error(f"ZATCA: Order {self.name} is a refund but missing required refund reason")
+                self.l10n_sa_zatca_status = 'error'
+                self.l10n_sa_zatca_error_message = "Refund reason is required for ZATCA compliance"
+                return
+            else:
+                _logger.info(f"ZATCA: Refund order {self.name} has valid refund reason: {self.l10n_sa_zatca_refund_reason}")
             
         # Mark as queued for immediate processing by cron job
         self.l10n_sa_zatca_status = 'queued'
@@ -305,6 +382,10 @@ class PosOrder(models.Model):
                 'invoice_counter': str(self._get_invoice_counter()),  # Get proper counter
                 'previous_invoice_hash': self._get_previous_invoice_hash(),
                 'qr_code': self._generate_base64_qr_code(),  # Generate proper QR
+                'invoice_type_code': self._get_zatca_invoice_type_code(),  # 381 for refunds, 388 for normal
+                'billing_reference': self._get_zatca_billing_reference_vals(),  # For credit notes
+                'refund_reason': self._l10n_sa_get_refund_reason_for_zatca_xml(),  # Refund details
+                'order_reference': self.name,  # Order reference ID
                 'supplier': {
                     'name': self.company_id.name,
                     'vat': self.company_id.vat or '',
@@ -349,6 +430,13 @@ class PosOrder(models.Model):
                 line_total_without_tax = round(calculated_line_amount, 2)
                 line_total_with_tax = float(line.price_subtotal_incl)
                 
+                # CRITICAL: ZATCA BR-KSA-F-04 - All amounts must be positive for credit notes
+                if self._is_refund_order():
+                    line_total_without_tax = abs(line_total_without_tax)
+                    line_total_with_tax = abs(line_total_with_tax)
+                    quantity = abs(quantity)
+                    unit_price = abs(unit_price)
+                
                 # ZATCA BR-CO-17 & BR-S-09: VAT amount = taxable amount × (VAT rate / 100), rounded to 2 decimals
                 calculated_tax_amount = round(line_total_without_tax * (tax_rate / 100), 2)
                 tax_amount = calculated_tax_amount
@@ -373,10 +461,10 @@ class PosOrder(models.Model):
                 line_number += 1
             
             # Ensure consistency between line totals and invoice totals (BR-S-08, BR-CO-10)
-            invoice_data['total_without_tax'] = total_lines_without_tax
+            invoice_data['total_without_tax'] = abs(total_lines_without_tax) if self._is_refund_order() else total_lines_without_tax
             # ZATCA BR-CO-17 & BR-S-09: Use dynamically calculated tax total from actual line taxes
-            invoice_data['total_tax'] = round(total_calculated_tax, 2)
-            invoice_data['total_with_tax'] = round(total_lines_without_tax + total_calculated_tax, 2)
+            invoice_data['total_tax'] = round(abs(total_calculated_tax) if self._is_refund_order() else total_calculated_tax, 2)
+            invoice_data['total_with_tax'] = round(abs(total_lines_without_tax + total_calculated_tax) if self._is_refund_order() else (total_lines_without_tax + total_calculated_tax), 2)
             
             # Render XML using our ZATCA-compliant template
             xml_markup = self.env['ir.qweb']._render(
@@ -432,12 +520,16 @@ class PosOrder(models.Model):
         """Generate ZATCA-compliant QR code data for simplified invoices"""
         try:
             # ZATCA Phase 2 QR Code fields (simplified version)
+            # CRITICAL: Use absolute values for refunds to match XML amounts
+            total_amount = abs(self.amount_total) if self._is_refund_order() else self.amount_total
+            tax_amount = abs(self.amount_tax) if self._is_refund_order() else self.amount_tax
+            
             qr_fields = {
                 '1': self.company_id.name or '',  # Seller name
                 '2': self.company_id.vat or '',   # VAT registration number
                 '3': self.date_order.strftime('%Y-%m-%dT%H:%M:%SZ'),  # Invoice timestamp
-                '4': f"{self.amount_total:.2f}",  # Invoice total with VAT
-                '5': f"{self.amount_tax:.2f}",   # VAT total
+                '4': f"{total_amount:.2f}",  # Invoice total with VAT (positive for refunds)
+                '5': f"{tax_amount:.2f}",   # VAT total (positive for refunds)
             }
             
             # For simplified invoices, add Phase 2 fields with proper certificate data

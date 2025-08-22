@@ -1,0 +1,159 @@
+/* ZATCA Refund Reason Popup Styles */
+
+.zatca-refund-reason-popup {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.zatca-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 4px solid #28a745;
+}
+
+.zatca-header h5 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.zatca-header small {
+    color: #6c757d;
+    font-size: 0.85em;
+}
+
+.zatca-refund-reason-popup .form-label {
+    color: #2c3e50;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.zatca-refund-reason-popup .form-label .text-danger {
+    color: #dc3545 !important;
+}
+
+.zatca-refund-reason-popup .form-select,
+.zatca-refund-reason-popup .form-control {
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+.zatca-refund-reason-popup .form-select:focus,
+.zatca-refund-reason-popup .form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    outline: none;
+}
+
+.zatca-refund-reason-popup textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border: 1px solid #2196f3;
+    border-radius: 6px;
+    color: #1565c0;
+}
+
+.alert-info .fa-info-circle {
+    color: #2196f3;
+}
+
+.zatca-reason-preview {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-top: 12px;
+    border-left: 3px solid #28a745;
+}
+
+.zatca-reason-preview .badge {
+    font-size: 0.85em;
+    padding: 4px 8px;
+}
+
+/* Arabic text support */
+.zatca-refund-reason-popup [dir="rtl"] {
+    text-align: right;
+}
+
+.zatca-refund-reason-popup .form-label small {
+    display: block;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* Button styles */
+.zatca-refund-reason-popup .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.zatca-refund-reason-popup .btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+}
+
+.zatca-refund-reason-popup .btn-primary:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.zatca-refund-reason-popup .btn-secondary {
+    background: #6c757d;
+    border: none;
+    color: white;
+}
+
+.zatca-refund-reason-popup .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .zatca-refund-reason-popup {
+        padding: 12px;
+    }
+    
+    .zatca-header {
+        padding: 12px;
+    }
+    
+    .zatca-refund-reason-popup .form-select,
+    .zatca-refund-reason-popup .form-control {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* Loading animation for async operations */
+.zatca-loading {
+    position: relative;
+}
+
+.zatca-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #28a745;
+    border-radius: 50%;
+    animation: zatca-spin 1s linear infinite;
+}
+
+@keyframes zatca-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

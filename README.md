@@ -31,6 +31,11 @@ An optimized replacement for the standard `l10n_sa_edi_pos` module, providing di
 4. **Enable Direct Mode**: Navigate to POS Configuration and enable "ZATCA Direct Mode" for your point of sale
 5. **Test Transactions**: Perform test transactions to verify QR code generation and ZATCA submission workflow
 
+## Changelog
+
+### Version 18.0.1.1.0
+✅ **Added ZATCA Refund Features:** Interactive refund reason popup with 6 predefined codes and full ZATCA compliance (BR-KSA-17, BR-KSA-F-04)
+
 ## Support
 
 This module is designed for **Saudi Arabian businesses** requiring **high-performance ZATCA compliance** in retail environments.

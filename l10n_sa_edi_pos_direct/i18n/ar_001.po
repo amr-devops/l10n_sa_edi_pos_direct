@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-20 19:13+0000\n"
-"PO-Revision-Date: 2025-08-20 22:22+0300\n"
+"POT-Creation-Date: 2025-08-21 18:13+0000\n"
+"PO-Revision-Date: 2025-08-22 18:46+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ar\n"
@@ -18,19 +18,17 @@ msgstr ""
 "X-Generator: Poedit 3.7\n"
 
 
-
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_config_form_zatca
-#, fuzzy
 msgid "<span invisible=\"pos_invoice_journal_id\">❌ No Invoice Journal</span>"
 msgstr "<span invisible=\"pos_invoice_journal_id\">❌ لا توجد فاتورة يومية</span>"
 
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_config_form_zatca
-#, fuzzy
 msgid ""
 "<strong>Certificate Status:</strong>\n"
-"                            <span invisible=\"not pos_invoice_journal_id.l10n_sa_production_csid_certificate_id\"> ✅ Production Certificate Available</span>\n"
+"                            <span invisible=\"not pos_invoice_journal_id.l10n_sa_production_csid_certificate_id\"> ✅ Production Certificate "
+"Available</span>\n"
 "                                <span invisible=\"pos_invoice_journal_id.l10n_sa_production_csid_certificate_id\"> ⚠️ No Production Certificate</span>"
 msgstr ""
 "<strong>حالة الشهادة:</strong>\n"
@@ -39,18 +37,44 @@ msgstr ""
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "All pending ZATCA orders have been processed successfully."
 msgstr "تمت معالجة جميع طلبات  هيئة الزكاة والضريبة المعلقة بنجاح."
 
 #. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+msgid "Cancel"
+msgstr "إلغاء"
+
+#. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,help:l10n_sa_edi_pos_direct.field_pos_config__l10n_sa_is_saudi_company
 #: model:ir.model.fields,help:l10n_sa_edi_pos_direct.field_res_config_settings__l10n_sa_is_saudi_company
-#, fuzzy
 msgid "Computed field to check if company is Saudi Arabian"
 msgstr "الحقل المحسوب للتحقق مما إذا كانت الشركة سعودية أم لا"
 
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model,name:l10n_sa_edi_pos_direct.model_res_config_settings
+msgid "Config Settings"
+msgstr "تهيئة الإعدادات "
 
+#. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+msgid "Confirm Refund"
+msgstr "تأكيد الارجاع"
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_refund_reason__customer_request
+msgid "Customer Cancellation - إلغاء بطلب العميل"
+msgstr ""
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_refund_reason__desc_error
+msgid "Description Error - عيب في الوصف"
+msgstr ""
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,field_description:l10n_sa_edi_pos_direct.field_pos_config__l10n_sa_edi_pos_direct_mode_enabled
@@ -66,77 +90,79 @@ msgstr "تمكين الإنشاء المحلي للفواتير المبسطة �
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,help:l10n_sa_edi_pos_direct.field_pos_config__l10n_sa_edi_pos_direct_mode_enabled
 #: model:ir.model.fields,help:l10n_sa_edi_pos_direct.field_res_config_settings__l10n_sa_edi_pos_direct_mode_enabled
-#, fuzzy
 msgid "Enable simplified invoices with ZATCA reporting"
 msgstr "تمكين الفواتير المبسطة مع إعداد تقارير ZATCA"
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_status__error
-#, fuzzy
 msgid "Error"
 msgstr "خطأ "
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
-#, fuzzy
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "Error during synchronization: %s"
 msgstr "خطأ أثناء المزامنة: %s"
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "Failed to generate invoice XML for ZATCA submission: %s"
 msgstr "فشل إنشاء فاتورة XML لتقديم  هيئة الزكاة والضريبة: %s"
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "Failed to retry ZATCA submission for order %s: %s"
 msgstr "فشل إعادة محاولة تقديم  هيئة الزكاة والضريبة للطلب %s: %s"
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_status__generated
-#, fuzzy
 msgid "Generated Locally"
 msgstr "تم توليدها محلياً"
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/order_receipt/order_receipt.xml:0
 #: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/order_receipt/order_receipt.xml:0
-#, fuzzy
 msgid "Generated in compliance with ZATCA requirements"
 msgstr "تم إنشاؤها بما يتوافق مع متطلبات قانون مكافحة الإرهاب في زاتكا"
 
+#. module: l10n_sa_edi_pos_direct
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_order_search_zatca
+msgid "Group By"
+msgstr ""
+
+#. module: l10n_sa_edi_pos_direct
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.zatca_pos_simplified_invoice
+msgid "ICV"
+msgstr ""
 
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_config_form_zatca
-#, fuzzy
 msgid "Invoice Journal"
 msgstr "يومية الفواتير"
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,field_description:l10n_sa_edi_pos_direct.field_pos_config__l10n_sa_is_saudi_company
 #: model:ir.model.fields,field_description:l10n_sa_edi_pos_direct.field_res_config_settings__l10n_sa_is_saudi_company
-#, fuzzy
 msgid "Is Saudi Company"
 msgstr "هل الشركة السعودية"
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "Journal is not ready for ZATCA submission. Please complete onboarding first."
 msgstr "دفترة اليومية ليست جاهزة للتقديم في  هيئة الزكاة والضريبة. يُرجى إكمال التسجيل أولاً."
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_status__legacy
-#, fuzzy
 msgid "Legacy Order (Pre-Module)"
 msgstr "النظام القديم (قبل الوحدة النمطية)"
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "No UUID available for ZATCA submission"
 msgstr "لا يوجد معرّف UUID متاح لتقديم  لهيئة الزكاة والضريبة"
 
@@ -150,31 +176,96 @@ msgstr "لم يتم العثور على أي طلبات  هيئة الزكاة �
 msgid "Orders with ZATCA processing will appear here."
 msgstr "ستظهر الطلبات التي تتم معالجتها مع  هيئة الزكاة والضريبة هنا."
 
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_refund_reason__other_reason
+msgid "Other Reasons - أسباب أخرى"
+msgstr ""
 
+#. module: l10n_sa_edi_pos_direct
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.zatca_pos_simplified_invoice
+msgid "PIH"
+msgstr ""
 
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_status__pending
+msgid "Pending Generation"
+msgstr ""
+
+#. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.js:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.js:0
+msgid "Please select a refund reason for ZATCA compliance."
+msgstr "يُرجى تحديد سبب استرداد الأموال للامتثال لقانون ضريبة القيمة المضافة."
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model,name:l10n_sa_edi_pos_direct.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr "تهيئة نقطة البيع "
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model,name:l10n_sa_edi_pos_direct.model_pos_order
+msgid "Point of Sale Orders"
+msgstr "طلبات نقطة البيع "
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_refund_reason__price_error
+msgid "Price Error - خطأ في السعر"
+msgstr ""
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_refund_reason__product_defect
+msgid "Product Defect - عطل في المنتج"
+msgstr ""
+
+#. module: l10n_sa_edi_pos_direct
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.zatca_pos_simplified_invoice
+msgid "QR"
+msgstr ""
 
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_order_form_zatca
-#, fuzzy
 msgid "QR Code (Scannable)"
 msgstr "رمز الاستجابة السريعة (قابل للمسح الضوئي)"
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,field_description:l10n_sa_edi_pos_direct.field_pos_order__l10n_sa_qr_code_image
-#, fuzzy
 msgid "QR Code Image"
 msgstr "رمز الاستجابة السريعة"
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,help:l10n_sa_edi_pos_direct.field_pos_order__l10n_sa_qr_code_image
-#, fuzzy
 msgid "QR code as HTML image for display"
 msgstr "رمز الاستجابة السريعة كصورة HTML للعرض"
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_refund_reason__qty_error
+msgid "Quantity Error - خطأ في الكمية"
+msgstr ""
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields.selection,name:l10n_sa_edi_pos_direct.selection__pos_order__l10n_sa_zatca_status__queued
 msgid "Queued for ZATCA"
 msgstr "في قائمة الانتظار لهيئة الزكاة والضريبة"
+
+#. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+msgid "Refund Reason"
+msgstr "سبب الاسترجاع"
+
+#. module: l10n_sa_edi_pos_direct
+#: model:ir.model.fields,help:l10n_sa_edi_pos_direct.field_pos_order__l10n_sa_zatca_refund_reason
+msgid "Refund reason code for ZATCA direct mode compliance"
+msgstr "رمز سبب الاسترداد للامتثال لوضع ZATCA المباشر"
+
+#. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/ticket_screen/ticket_screen.js:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/ticket_screen/ticket_screen.js:0
+msgid "Refund reason is required for ZATCA compliance. Please try again."
+msgstr "سبب الاسترداد مطلوب من أجل الامتثال لقانون ضريبة القيمة المضافة. يرجى المحاولة مرة أخرى."
 
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_order_form_zatca
@@ -186,6 +277,10 @@ msgstr "إعادة المحاولة لربط مع  هيئة الزكاة وال�
 msgid "Successfully Submitted to ZATCA"
 msgstr "تم تقديمه بنجاح إلى  هيئة الزكاة والضريبة"
 
+#. module: l10n_sa_edi_pos_direct
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.zatca_pos_simplified_invoice
+msgid "VAT"
+msgstr ""
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,help:l10n_sa_edi_pos_direct.field_pos_order__l10n_sa_zatca_submission_time
@@ -200,23 +295,42 @@ msgstr "خطأ من  هيئة الزكاة والضريبة"
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,field_description:l10n_sa_edi_pos_direct.field_pos_order__l10n_sa_zatca_error_message
 msgid "ZATCA Error Message"
-msgstr "رسالة خطأ من  هيئة الزكاة والضريبة"
+msgstr "رسالة خطأ من هيئة الزكاة والضريبة"
 
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_order_form_zatca
 msgid "ZATCA Information"
-msgstr "معلومات عن  هيئة الزكاة والضريبة"
+msgstr "معلومات عن هيئة الزكاة والضريبة"
 
 #. module: l10n_sa_edi_pos_direct
-#: model:ir.actions.act_window,name:l10n_sa_edi_pos_direct.action_pos_order_zatca
-#: model:ir.ui.menu,name:l10n_sa_edi_pos_direct.menu_pos_order_zatca
+#: model:ir.actions.act_window,name:l10n_sa_edi_pos_direct.action_pos_order_zatca model:ir.ui.menu,name:l10n_sa_edi_pos_direct.menu_pos_order_zatca
 msgid "ZATCA Orders"
-msgstr "طلبات  هيئة الزكاة والضريبة"
+msgstr "طلبات هيئة الزكاة والضريبة"
 
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_order_search_zatca
 msgid "ZATCA Pending"
 msgstr "في انتظار التقديم الى  هيئة الزكاة والضريبة"
+
+#. module: l10n_sa_edi_pos_direct
+#: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_order_form_zatca
+msgid "ZATCA Refund Information"
+msgstr "معلومات استرداد الأموال المستردة من ZATCA"
+
+#. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+#: model:ir.model.fields,field_description:l10n_sa_edi_pos_direct.field_pos_order__l10n_sa_zatca_refund_reason
+msgid "ZATCA Refund Reason"
+msgstr "سبب استرداد الأموال المستردة من ZATCA"
+
+#. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.js:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.js:0
+msgid "ZATCA Refund Reason Required"
+msgstr "سبب الاسترداد المطلوب من ZATCA"
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.model.fields,field_description:l10n_sa_edi_pos_direct.field_pos_order__l10n_sa_zatca_status
@@ -232,17 +346,17 @@ msgstr "وقت التقديم في  هيئة الزكاة والضريبة"
 #. module: l10n_sa_edi_pos_direct
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi_pos_direct.view_pos_order_search_zatca
 msgid "ZATCA Submitted"
-msgstr "تم التقديم الى  هيئة الزكاة والضريبة"
+msgstr "تم التقديم الى هيئة الزكاة والضريبة"
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "ZATCA Synchronization"
 msgstr "مزامنة مع  هيئة الزكاة والضريبة"
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_order.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_order.py:0
 msgid "ZATCA Synchronization Error"
 msgstr "خطأ في مزامنة مع  هيئة الزكاة والضريبة"
 
@@ -253,8 +367,7 @@ msgstr "المزامنة المباشرة مع هيئة الزكاة والضر�
 
 #. module: l10n_sa_edi_pos_direct
 #. odoo-python
-#: code:addons/l10n_sa_edi_pos_direct/models/pos_config.py:0
-#, fuzzy
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/models/pos_config.py:0 code:addons/l10n_sa_edi_pos_direct/models/pos_config.py:0
 msgid ""
 "ZATCA direct Mode Error:\n"
 "\n"
@@ -276,19 +389,30 @@ msgstr ""
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.actions.server,name:l10n_sa_edi_pos_direct.ir_cron_zatca_process_pending_orders_ir_actions_server
-#, fuzzy
 msgid "ZATCA: Process Pending POS Orders"
 msgstr "ZATCA: معالجة أوامر نقاط البيع المعلقة"
 
 #. module: l10n_sa_edi_pos_direct
 #: model:ir.actions.server,name:l10n_sa_edi_pos_direct.ir_cron_zatca_retry_failed_ir_actions_server
-#, fuzzy
 msgid "ZATCA: Retry Failed Submissions"
 msgstr "ZATCA: إعادة محاولة التقديمات الفاشلة"
 
 
 #. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/order_receipt/order_receipt.xml:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/order_receipt/order_receipt.xml:0
+msgid "المرحلة الثانية - الربط والتكامل"
+msgstr ""
+
+#. module: l10n_sa_edi_pos_direct
+#. odoo-javascript
+#: code:addons/l10n_sa_edi_pos_direct/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+#: code:addons/l10n_sa_edi_pos_direct/static/src/overrides/components/zatca_refund_reason_popup/zatca_refund_reason_popup.xml:0
+msgid "سبب الاسترداد"
+msgstr ""
+
+#. module: l10n_sa_edi_pos_direct
 #: model:ir.actions.server,name:l10n_sa_edi_pos_direct.action_zatca_sync_all_pending
-#, fuzzy
 msgid "🔄 Sync All Pending ZATCA Orders"
 msgstr "🔄 مزامنة جميع طلبات ZATCA المعلقة"
