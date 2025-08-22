@@ -4,7 +4,7 @@
 {
     'name': 'Saudi Arabia - POS Direct ZATCA Integration',
     'countries': ['sa'],
-    'version': "18.0.1.1.0",
+    'version': "18.0.1.2.0",
     'category': 'Accounting/Localizations/Point of Sale',
     'summary': """
         Direct ZATCA integration for POS - Local generation with async reporting
@@ -28,6 +28,7 @@ Technical Implementation:
 - Client-side digital signatures using WebCrypto API
 - Background job queue for ZATCA submission
 - Optimized for high-volume retail environments
+
     """,
     'author': 'EasyERPS, AMR Hawsawi',
     'website': 'https://easyerps.com',

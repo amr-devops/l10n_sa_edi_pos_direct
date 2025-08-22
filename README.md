@@ -33,6 +33,9 @@ An optimized replacement for the standard `l10n_sa_edi_pos` module, providing di
 
 ## Changelog
 
+### Version 18.0.1.2.0
+🔧 **Fixed Arabic Character Encoding:** Resolved btoa() InvalidCharacterError when using Arabic language interface
+
 ### Version 18.0.1.1.0
 ✅ **Added ZATCA Refund Features:** Interactive refund reason popup with 6 predefined codes and full ZATCA compliance (BR-KSA-17, BR-KSA-F-04)
 

@@ -6,6 +6,25 @@ import { _t } from "@web/core/l10n/translation";
 
 patch(PosOrder.prototype, {
 
+    // Unicode-safe base64 encoding function to handle Arabic characters
+    _unicodeSafeBase64Encode(str) {
+        try {
+            // First encode the string as UTF-8 bytes, then convert to base64
+            // This handles Arabic and other non-Latin1 characters properly
+            const utf8Bytes = new TextEncoder().encode(str);
+            let binaryString = '';
+            for (let i = 0; i < utf8Bytes.length; i++) {
+                binaryString += String.fromCharCode(utf8Bytes[i]);
+            }
+            return window.btoa(binaryString);
+        } catch (error) {
+            console.error('ZATCA: Error in Unicode-safe base64 encoding, using fallback:', error);
+            // Fallback: remove non-ASCII characters and encode
+            const asciiOnly = str.replace(/[^\x00-\x7F]/g, "");
+            return window.btoa(asciiOnly);
+        }
+    },
+
     // Override setup to initialize from serialized data
     setup(vals) {
         super.setup(vals);
@@ -107,7 +126,7 @@ patch(PosOrder.prototype, {
                 codeWriter.write(qr_base64_string, 150, 150)
             );
             
-            return "data:image/svg+xml;base64," + window.btoa(qr_code_svg);
+            return "data:image/svg+xml;base64," + this._unicodeSafeBase64Encode(qr_code_svg);
         } catch (error) {
             console.error('ZATCA: Error generating production QR:', error);
             
@@ -123,7 +142,7 @@ patch(PosOrder.prototype, {
                         </svg>
                     `;
 
-                    return `data:image/svg+xml;base64,${btoa(simpleSvg)}`;
+                    return `data:image/svg+xml;base64,${this._unicodeSafeBase64Encode(simpleSvg)}`;
                 }
             } catch (fallbackError) {
                 console.error('ZATCA: Fallback QR generation failed:', fallbackError);
@@ -159,12 +178,15 @@ patch(PosOrder.prototype, {
                 binary_array = binary_array.concat(field_byte_array);
             });
 
-            let binary_string = "";
-            for (let i = 0; i < binary_array.length; i++) {
-                binary_string += String.fromCharCode(binary_array[i]);
+            // Convert binary array directly to base64 without double UTF-8 encoding
+            const uint8Array = new Uint8Array(binary_array);
+            let binaryString = '';
+            for (let i = 0; i < uint8Array.length; i++) {
+                binaryString += String.fromCharCode(uint8Array[i]);
             }
             
-            return btoa(binary_string);
+            // Use native btoa since we already have proper binary data
+            return window.btoa(binaryString);
             
         } catch (error) {
             console.error('ZATCA: Error converting QR data to base64:', error);
@@ -316,7 +338,7 @@ patch(PosOrder.prototype, {
                             this.company.vat + 
                             this.get_total_with_tax() + 
                             Date.now();
-        return btoa('ZATCA_FALLBACK_' + fallbackData).substring(0, 64);
+        return this._unicodeSafeBase64Encode('ZATCA_FALLBACK_' + fallbackData).substring(0, 64);
     },
 
     _getZatcaFormattedDate() {
@@ -392,7 +414,7 @@ patch(PosOrder.prototype, {
             
             // Simple deterministic hash (not crypto-grade but consistent)
             const hashInput = JSON.stringify(canonicalContent);
-            return btoa(hashInput).replace(/[^A-Za-z0-9]/g, '').substring(0, 64);
+            return this._unicodeSafeBase64Encode(hashInput).replace(/[^A-Za-z0-9]/g, '').substring(0, 64);
         } catch (error) {
             return this._generateFallbackHash();
         }
@@ -420,7 +442,7 @@ patch(PosOrder.prototype, {
             const dataString = JSON.stringify(signatureInput);
             
             // Simple but consistent deterministic generation
-            return btoa(dataString).replace(/[^A-Za-z0-9]/g, '').substring(0, 88);
+            return this._unicodeSafeBase64Encode(dataString).replace(/[^A-Za-z0-9]/g, '').substring(0, 88);
             
         } catch (error) {
             return this._generateFallbackSignature();
@@ -430,7 +452,7 @@ patch(PosOrder.prototype, {
     
     _generateFallbackSignature() {
         const orderData = `${this.company.vat}_${this.pos_reference}_${this.get_total_with_tax()}`;
-        return btoa(orderData).replace(/[^A-Za-z0-9]/g, '').substring(0, 64);
+        return this._unicodeSafeBase64Encode(orderData).replace(/[^A-Za-z0-9]/g, '').substring(0, 64);
     },
 
     getPublicKeySync() {
@@ -465,7 +487,7 @@ patch(PosOrder.prototype, {
             }
             
             // Fallback to company-based placeholder
-            return btoa('ZATCA_PUBLIC_KEY_' + this.company.vat).substring(0, 64);
+            return this._unicodeSafeBase64Encode('ZATCA_PUBLIC_KEY_' + this.company.vat).substring(0, 64);
         } catch (error) {
             return 'DEFAULT_PUBLIC_KEY_' + Date.now().toString().substring(0, 32);
         }
@@ -516,7 +538,7 @@ patch(PosOrder.prototype, {
             }
             
             // Fallback to company-based placeholder
-            return btoa('ZATCA_CERT_' + this.company.vat).substring(0, 64);
+            return this._unicodeSafeBase64Encode('ZATCA_CERT_' + this.company.vat).substring(0, 64);
         } catch (error) {
             return 'DEFAULT_CERT_SIG_' + Date.now().toString().substring(0, 32);
         }
