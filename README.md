@@ -33,6 +33,10 @@ An optimized replacement for the standard `l10n_sa_edi_pos` module, providing di
 
 ## Changelog
 
+### Version 18.0.1.3.0
+🔧 **Enhanced QR Code Integration:** Improved override of compute_sa_qr_code method to properly use l10n_sa_pos functions  
+🚀 **Code Optimization:** Removed redundant QR generation methods and streamlined date formatting
+
 ### Version 18.0.1.2.0
 🔧 **Fixed Arabic Character Encoding:** Resolved btoa() InvalidCharacterError when using Arabic language interface
 

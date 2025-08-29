@@ -1,11 +1,5 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-import logging
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
-
-_logger = logging.getLogger(__name__)
+from odoo.exceptions import RedirectWarning
 
 
 class PosConfig(models.Model):
@@ -76,25 +70,23 @@ class PosConfig(models.Model):
     
 
     def open_ui(self):
-        """Override to check ZATCA direct configuration before opening POS"""
-        self.ensure_one()
-        
-        # Check ZATCA configuration for Saudi companies with direct mode enabled
-        if (self.company_id.country_id.code == 'SA' and 
-            self.l10n_sa_edi_pos_direct_mode_enabled):
-            
-            # Check if journal is properly configured for ZATCA
-            if not self.invoice_journal_id._l10n_sa_ready_to_submit_einvoices():
-                raise UserError(_(
-                    "ZATCA direct Mode Error:\n\n"
-                    "The POS configuration '%s' has ZATCA direct mode enabled, "
-                    "but the invoice journal is not properly configured.\n\n"
-                    "Please complete the ZATCA onboarding process first:\n"
-                    "• Go to Accounting > Configuration > Journals\n"
-                    "• Configure your invoice journal for ZATCA\n"
-                    "• Obtain production certificates from ZATCA"
-                ) % self.name)
-        
+        for config in self:
+            if (
+                    config.company_id.country_id.code == 'SA'
+                    and config.invoice_journal_id
+                    and (config.invoice_journal_id.edi_format_ids.filtered(lambda f: f.code == "sa_zatca")
+                         and not config.invoice_journal_id._l10n_sa_ready_to_submit_einvoices())
+            ):
+                msg = _("The invoice journal of the point of sale %s must be properly onboarded "
+                        "according to ZATCA specifications.\n", config.name)
+                action = {
+                    "view_mode": "form",
+                    "res_model": "account.journal",
+                    "type": "ir.actions.act_window",
+                    "res_id": config.invoice_journal_id.id,
+                    "views": [[False, "form"]],
+                }
+                raise RedirectWarning(msg, action, _('Go to Journal configuration'))
         return super().open_ui()
     
 

@@ -103,31 +103,13 @@ patch(PosStore.prototype, {
     // Override getReceiptHeaderData to handle QR code generation
     getReceiptHeaderData(order) {
         const data = super.getReceiptHeaderData(order);
-        
-        // Handle ZATCA QR code generation if direct mode is enabled
-        if (order && order.shouldUsedirectMode && order.shouldUsedirectMode()) {
-            try {
-                const enhancedQR = order.generateZatcaQRSync ? 
-                    order.generateZatcaQRSync() : null;
-                
-                if (enhancedQR) {
-                    // Replace the standard QR with our enhanced 9-field QR
-                    data.qr_code = enhancedQR;
-                    data.zatca_direct = true; 
-                } else {
-                    console.warn('ZATCA: Enhanced QR generation failed, keeping standard QR');
-                }
-            } catch (error) {
-                console.error('ZATCA: Error generating enhanced QR:', error);
-                // Keep standard QR code from super call
-            }
-        } else {
-            if (data.qr_code) {
-                data.zatca_enhanced = false;
-                data.zatca_fields = 5;
+        if (order && order.company?.country_id?.code === "SA") {
+            if (order.shouldUsedirectMode && order.shouldUsedirectMode()) {
+                data.zatca_direct = true;
+            } else {
+                data.zatca_direct = false;
             }
         }
-        
         return data;
     },
 

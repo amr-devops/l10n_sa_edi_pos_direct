@@ -25,7 +25,7 @@ class PosOrder(models.Model):
         ('queued', 'Queued for ZATCA'),
         ('submitted', 'Successfully Submitted to ZATCA'),
         ('error', 'Error'),
-    ], string="ZATCA Status", default='legacy', copy=False)
+    ], string="ZATCA Status", default=False, copy=False)
     
     l10n_sa_zatca_submission_time = fields.Datetime(
         string="ZATCA Submission Time",
@@ -52,6 +52,45 @@ class PosOrder(models.Model):
         string="QR Code Image",
         help="QR code as HTML image for display"
     )
+    
+    # Standard l10n_sa_edi_pos fields - only for non-direct mode orders
+    l10n_sa_invoice_qr_code_str = fields.Char(
+        string="ZATCA QR Code",
+        compute="_compute_l10n_sa_invoice_fields",
+        help="QR code from related account move (non-direct mode only)"
+    )
+    l10n_sa_invoice_edi_state = fields.Selection(
+        string="Electronic invoicing",
+        selection=[
+            ('to_send', 'To Send'),
+            ('sent', 'Sent'),
+            ('cancelled', 'Cancelled'),
+            ('to_cancel', 'To Cancel'),
+        ],
+        compute="_compute_l10n_sa_invoice_fields",
+        help="Electronic invoicing state from related account move (non-direct mode only)"
+    )
+
+    @api.depends('account_move', 'account_move.l10n_sa_qr_code_str', 'account_move.edi_state')
+    def _compute_l10n_sa_invoice_fields(self):
+        """
+        Compute l10n_sa_invoice fields from related account.move
+        Only for orders that don't use ZATCA direct mode processing
+        """
+        for order in self:
+            # Only populate these fields if the order should NOT use ZATCA direct processing
+            if not order._should_process_zatca():
+                # Get values from related account.move (standard l10n_sa_edi_pos behavior)
+                if order.account_move:
+                    order.l10n_sa_invoice_qr_code_str = order.account_move.l10n_sa_qr_code_str or False
+                    order.l10n_sa_invoice_edi_state = order.account_move.edi_state or False
+                else:
+                    order.l10n_sa_invoice_qr_code_str = False
+                    order.l10n_sa_invoice_edi_state = False
+            else:
+                # For ZATCA direct mode orders, clear these fields as they use their own system
+                order.l10n_sa_invoice_qr_code_str = False
+                order.l10n_sa_invoice_edi_state = False
 
     def _l10n_sa_get_refund_reason_for_zatca_xml(self):
         """
@@ -78,9 +117,7 @@ class PosOrder(models.Model):
         """Override create to initialize ZATCA fields for Saudi companies"""
         order = super().create(vals)
         
-        if (order.company_id.country_id.code == 'SA' and 
-            order.session_id.config_id.l10n_sa_edi_pos_direct_mode_enabled and
-            order._is_simplified_invoice()):
+        if (order._should_process_zatca()):
             
             # Set status from frontend or default to pending
             order.l10n_sa_zatca_status = 'generated'
@@ -610,12 +647,19 @@ class PosOrder(models.Model):
             
             # Sign the XML with the digital signature
             signed_xml = edi_format._l10n_sa_sign_xml(xml_content, certificate, digital_signature)
-            
+                        
             # CRITICAL: Generate QR code from the signed XML (without QR yet)
             # This calculates the hash that will be embedded IN the QR code
-            qr_code_str = self.env['account.move']._l10n_sa_get_qr_code(
-                journal, signed_xml, certificate, digital_signature, is_b2c=True
-            )
+            # Handle compatibility with different Odoo versions (commit 06e21763)
+            try:
+                # Try with company_id first (works with most versions)
+                qr_code_str = self.env['account.move']._l10n_sa_get_qr_code(
+                    journal, signed_xml, certificate, digital_signature, is_b2c=True
+                )
+            except (AttributeError, TypeError) as e:
+                qr_code_str = self.env['account.move']._l10n_sa_get_qr_code(
+                    self.company_id, signed_xml, certificate, digital_signature, is_b2c=True
+                )
             
             # Apply QR code to signed XML
             root = etree.fromstring(signed_xml)

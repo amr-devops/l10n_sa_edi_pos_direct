@@ -3,8 +3,37 @@
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
+import { deserializeDateTime, formatDateTime } from "@web/core/l10n/dates";
+import { computeSAQRCode } from "@l10n_sa_pos/app/utils/qr";
 
 patch(PosOrder.prototype, {
+    
+    setup(_defaultObj, options) {
+        super.setup(...arguments);
+        
+        if (this.isSACompany && this.shouldUsedirectMode()) {
+            this.l10n_sa_zatca_status = _defaultObj.l10n_sa_zatca_status;
+        }else if (this.isSACompany) {
+            this.to_invoice = true;
+        }
+    },
+
+    is_to_invoice() {
+        if (this.isSACompany && this.shouldUsedirectMode()) {
+            return false;
+        }else if (this.isSACompany) {
+            return true;
+        }
+        return super.is_to_invoice(...arguments);
+    },
+    set_to_invoice(to_invoice) {
+        if (this.isSACompany && !this.shouldUsedirectMode()) {
+            this.assert_editable();
+            this.to_invoice = true;
+        } else {
+            super.set_to_invoice(...arguments);
+        }
+    },
 
     // Unicode-safe base64 encoding function to handle Arabic characters
     _unicodeSafeBase64Encode(str) {
@@ -25,25 +54,15 @@ patch(PosOrder.prototype, {
         }
     },
 
-    // Override setup to initialize from serialized data
-    setup(vals) {
-        super.setup(vals);
-        
-        // Initialize ZATCA direct fields for Saudi companies
-        if (this.isSACompany && this.config?.l10n_sa_edi_pos_direct_mode_enabled) {
-            this.l10n_sa_zatca_status = vals.l10n_sa_zatca_status || 'pending';
-        }
-    },
 
     export_for_printing(baseUrl, headerData) {
         const result = super.export_for_printing(...arguments);
         
-        // Ensure result has required structure
         if (!result || !result.orderlines) {
             return result;
         }
         
-        if (this.config?.l10n_sa_edi_pos_direct_mode_enabled ) {
+        if (this.shouldUsedirectMode()) {
                 result.zatca_direct = true;
         }
         return result;
@@ -56,185 +75,17 @@ patch(PosOrder.prototype, {
     shouldUsedirectMode() {
         return this.isSACompany && 
                this.config?.l10n_sa_edi_pos_direct_mode_enabled && 
-               this.isSimplifiedInvoice() &&
-               this._validateZatcaRequirements();
+               this.isSimplifiedInvoice()
+    },
+
+    // Alias method for consistency with pos_store.js
+    shouldUseDirectMode() {
+        return this.shouldUsedirectMode();
     },
 
     isSimplifiedInvoice() {
         // B2C transaction = simplified invoice
         return !this.partner_id || this.partner_id.company_type === 'person';
-    },
-
-    _validateZatcaRequirements() {
-        // Validate basic requirements for fast local ZATCA processing
-        try {
-            // Check ZXing library availability
-            if (!window.ZXing || !window.ZXing.BrowserQRCodeSvgWriter) {
-                console.warn('ZATCA: ZXing library not available for QR generation');
-                return false;
-            }
-
-            // Check WebCrypto API availability for local cryptographic operations
-            if (!window.crypto || !window.crypto.subtle) {
-                console.warn('ZATCA: WebCrypto API not available for local cryptography');
-                return false;
-            }
-
-            // Validate basic company data (required for ZATCA)
-            if (!this.company?.name) {
-                console.warn('ZATCA: Company name is required');
-                return false;
-            }
-
-            if (!this.company?.vat) {
-                console.warn('ZATCA: Company VAT number is required');
-                return false;
-            }
-
-            // All basic requirements met for local processing
-
-            return true;
-        } catch (error) {
-            console.error('ZATCA: Error validating requirements:', error);
-            return false;
-        }
-    },
-
-    generateZatcaQRSync() {
-        if (!this.isSACompany || !this._validateZatcaRequirements()) {
-            return null;
-        }
-        
-        try {
-            if (!window.ZXing || !window.ZXing.BrowserQRCodeSvgWriter) {
-                throw new Error('ZXing library not available');
-            }
-            
-            const codeWriter = new window.ZXing.BrowserQRCodeSvgWriter();
-            
-            // Generate production-ready QR data synchronously
-            const qr_values = this.generateQRDataSync();
-            if (!qr_values) {
-                throw new Error('Failed to generate QR data');
-            }
-            
-            // Convert QR data to base64 string (following Odoo's l10n_sa_pos pattern)
-            const qr_base64_string = this._convertQRDataToBase64String(qr_values);
-            
-            // Generate SVG using ZXing (exactly like Odoo original)
-            const qr_code_svg = new XMLSerializer().serializeToString(
-                codeWriter.write(qr_base64_string, 150, 150)
-            );
-            
-            return "data:image/svg+xml;base64," + this._unicodeSafeBase64Encode(qr_code_svg);
-        } catch (error) {
-            console.error('ZATCA: Error generating production QR:', error);
-            
-            // Fallback: Generate a simple base64 QR representation
-            try {
-                const qr_values = this.generateQRDataSync();
-                if (qr_values) {
-                    const qr_string = Object.values(qr_values).join('\x1D');
-                    const simpleSvg = `
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                            <rect width="100" height="100" fill="white"/>
-                            <text x="50" y="50" text-anchor="middle" font-size="8" fill="black">QR</text>
-                        </svg>
-                    `;
-
-                    return `data:image/svg+xml;base64,${this._unicodeSafeBase64Encode(simpleSvg)}`;
-                }
-            } catch (fallbackError) {
-                console.error('ZATCA: Fallback QR generation failed:', fallbackError);
-            }
-            
-            return null;
-        }
-    },
-
-    _convertQRDataToBase64String(qr_values) {
-        try {
-            const fields = [
-                qr_values[1] || '',  // Seller name
-                qr_values[2] || '',  // VAT number  
-                qr_values[3] || '',  // Timestamp
-                qr_values[4] || '',  // Invoice total
-                qr_values[5] || '',  // VAT total
-                qr_values[6] || '',  // Invoice hash
-                qr_values[7] || '',  // Digital signature
-                qr_values[8] || '',  // Public key
-                qr_values[9] || ''   // Certificate signature
-            ];
-
-            let binary_array = [];
-            
-            fields.forEach((field, index) => {
-                const tag = index + 1; // Tags 1-9
-                const textEncoder = new TextEncoder();
-                const field_byte_array = Array.from(textEncoder.encode(field));
-                
-                binary_array.push(tag);
-                binary_array.push(field_byte_array.length);
-                binary_array = binary_array.concat(field_byte_array);
-            });
-
-            // Convert binary array directly to base64 without double UTF-8 encoding
-            const uint8Array = new Uint8Array(binary_array);
-            let binaryString = '';
-            for (let i = 0; i < uint8Array.length; i++) {
-                binaryString += String.fromCharCode(uint8Array[i]);
-            }
-            
-            // Use native btoa since we already have proper binary data
-            return window.btoa(binaryString);
-            
-        } catch (error) {
-            console.error('ZATCA: Error converting QR data to base64:', error);
-            return '';
-        }
-    },
-
-    generateQRDataSync() {
-        try {
-            const company = this.company;
-            const timestamp = this.date_order || new Date().toISOString();
-            
-            // Validate required data
-            if (!company.name || !company.vat) {
-                throw new Error('Missing required company information');
-            }
-
-            // Ensure UUID exists
-            if (!this.uuid) {
-                throw new Error('ZATCA UUID is required but missing');
-            }
-
-            const qr_values = {
-                1: company.name,
-                2: company.vat,
-                3: timestamp,
-                4: this.get_total_with_tax().toFixed(2),
-                5: this.get_total_tax().toFixed(2),
-            };
-
-            // Add ZATCA Phase 2 fields if available
-            const uuid = this.uuid;
-            if (uuid) {
-                // Use ZATCA-compliant hash generation for field 6
-                qr_values[6] = this.calculateInvoiceHashSync();
-                qr_values[7] = this.generateDigitalSignatureSync();
-                qr_values[8] = this.getPublicKeySync();
-                qr_values[9] = this.getCertificateSignatureSync();
-                
-
-            }
-            
-
-            return qr_values;
-        } catch (error) {
-            console.error('ZATCA: Error generating QR data:', error);
-            return null;
-        }
     },
 
     _getStandardizedInvoiceContentForHash() {
@@ -542,6 +393,87 @@ patch(PosOrder.prototype, {
         } catch (error) {
             return 'DEFAULT_CERT_SIG_' + Date.now().toString().substring(0, 32);
         }
+    },
+
+    /**
+     * Override the default Odoo compute_sa_qr_code method to generate enhanced ZATCA Phase 2 QR codes
+     * when direct mode is enabled, otherwise fall back to the standard 5-field QR code
+     */
+    compute_sa_qr_code(name, vat, date_isostring, amount_total, amount_tax) {
+
+        // If ZATCA direct mode is enabled and this is a simplified invoice, generate enhanced QR
+        if (this.shouldUsedirectMode()) {
+            return this.generateEnhancedQRDataSync(name, vat, date_isostring, amount_total, amount_tax);
+        }
+        
+        // Otherwise, use the standard Odoo 5-field QR code from l10n_sa_pos
+        return computeSAQRCode(name, vat, date_isostring, amount_total, amount_tax);
+    },
+
+    /**
+     * Generate enhanced ZATCA Phase 2 QR code data (9 fields)
+     * Following the same pattern as Odoo's qr.js but adding Phase 2 fields
+     */
+    generateEnhancedQRDataSync(name, vat, date_isostring, amount_total, amount_tax) {
+        try {
+            const ksa_timestamp = formatDateTime(deserializeDateTime(date_isostring), {
+                tz: "Asia/Riyadh",
+                format: "yyyy-MM-dd HH:mm:ss",
+            });
+
+
+
+            // Standard 5 fields (same as Odoo's original)
+            const seller_name_enc = this._compute_qr_code_field(1, name);
+            const company_vat_enc = this._compute_qr_code_field(2, vat);
+            const timestamp_enc = this._compute_qr_code_field(3, ksa_timestamp);
+            const invoice_total_enc = this._compute_qr_code_field(4, amount_total.toString());
+            const total_vat_enc = this._compute_qr_code_field(5, amount_tax.toString());
+
+            // ZATCA Phase 2 additional fields (6-9)
+            const invoice_hash_enc = this._compute_qr_code_field(6, this.calculateInvoiceHashSync());
+            const digital_signature_enc = this._compute_qr_code_field(7, this.generateDigitalSignatureSync());
+            const public_key_enc = this._compute_qr_code_field(8, this.getPublicKeySync());
+            const certificate_signature_enc = this._compute_qr_code_field(9, this.getCertificateSignatureSync());
+
+            // Concatenate all fields (1-9)
+            const str_to_encode = seller_name_enc.concat(
+                company_vat_enc,
+                timestamp_enc,
+                invoice_total_enc,
+                total_vat_enc,
+                invoice_hash_enc,
+                digital_signature_enc,
+                public_key_enc,
+                certificate_signature_enc
+            );
+
+            // Convert to base64 (same as Odoo's original method)
+            let binary = "";
+            for (let i = 0; i < str_to_encode.length; i++) {
+                binary += String.fromCharCode(str_to_encode[i]);
+            }
+            return btoa(binary);
+
+        } catch (error) {
+            console.error('ZATCA: Error generating enhanced QR data:', error);
+            // Fallback to standard QR generation from l10n_sa_pos
+            return computeSAQRCode(name, vat, date_isostring, amount_total, amount_tax);
+        }
+    },
+
+
+
+    /**
+     * Helper function to compute QR code field encoding
+     * Same as the _compute_qr_code_field function in Odoo's qr.js
+     */
+    _compute_qr_code_field(tag, field) {
+        const textEncoder = new TextEncoder();
+        const name_byte_array = Array.from(textEncoder.encode(field));
+        const name_tag_encoding = [tag];
+        const name_length_encoding = [name_byte_array.length];
+        return name_tag_encoding.concat(name_length_encoding, name_byte_array);
     },
 
 
