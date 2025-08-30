@@ -112,17 +112,13 @@ class PosOrder(models.Model):
             }
         return None
 
-    @api.model
-    def create(self, vals):
-        """Override create to initialize ZATCA fields for Saudi companies"""
-        order = super().create(vals)
-        
-        if (order._should_process_zatca()):
-            
-            # Set status from frontend or default to pending
-            order.l10n_sa_zatca_status = 'generated'
-            
-        return order
+    @api.model_create_multi
+    def create(self, vals_list):
+        orders = super().create(vals_list)
+        for order in orders:
+            if order._should_process_zatca():
+                order.l10n_sa_zatca_status = 'generated'
+        return orders
 
     def _is_simplified_invoice(self):
         """Check if this order should generate a simplified invoice (B2C)"""

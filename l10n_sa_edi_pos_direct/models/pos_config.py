@@ -11,23 +11,7 @@ class PosConfig(models.Model):
         default=False,
         help="Enable simplified invoices with ZATCA reporting"
     )
-
-    l10n_sa_is_saudi_company = fields.Boolean(
-        string="Is Saudi Company",
-        compute='_compute_l10n_sa_is_saudi_company',
-        store=False,
-        help="Computed field to check if company is Saudi Arabian"
-    )
-
-    @api.depends('company_id.country_id.code')
-    def _compute_l10n_sa_is_saudi_company(self):
-        """Compute if company is Saudi Arabian"""
-        for config in self:
-            config.l10n_sa_is_saudi_company = (
-                config.company_id and 
-                config.company_id.country_id and 
-                config.company_id.country_id.code == 'SA'
-            )
+    country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
 
     def _get_zatca_certificate_data(self):
         """Get ZATCA certificate data for POS frontend"""
@@ -94,7 +78,6 @@ class ResConfigSettings(models.TransientModel):
         _inherit = 'res.config.settings'
 
         l10n_sa_edi_pos_direct_mode_enabled = fields.Boolean(related='pos_config_id.l10n_sa_edi_pos_direct_mode_enabled', readonly=False)
-        l10n_sa_is_saudi_company = fields.Boolean(related='pos_config_id.l10n_sa_is_saudi_company', readonly=False)
 
 
 
