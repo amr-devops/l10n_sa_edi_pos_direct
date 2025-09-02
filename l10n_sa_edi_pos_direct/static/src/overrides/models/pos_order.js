@@ -4,7 +4,6 @@ import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 import { deserializeDateTime, formatDateTime } from "@web/core/l10n/dates";
-import { computeSAQRCode } from "@l10n_sa_pos/app/utils/qr";
 
 patch(PosOrder.prototype, {
     
@@ -407,7 +406,7 @@ patch(PosOrder.prototype, {
         }
         
         // Otherwise, use the standard Odoo 5-field QR code from l10n_sa_pos
-        return computeSAQRCode(name, vat, date_isostring, amount_total, amount_tax);
+        return super.compute_sa_qr_code(...arguments);
     },
 
     /**
@@ -457,8 +456,7 @@ patch(PosOrder.prototype, {
 
         } catch (error) {
             console.error('ZATCA: Error generating enhanced QR data:', error);
-            // Fallback to standard QR generation from l10n_sa_pos
-            return computeSAQRCode(name, vat, date_isostring, amount_total, amount_tax);
+            return;
         }
     },
 
