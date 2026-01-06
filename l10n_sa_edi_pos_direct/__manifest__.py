@@ -26,7 +26,7 @@ Key Features:
 Technical Implementation:
 - Local UBL XML generation
 - Client-side digital signatures using WebCrypto API
-- Background job queue for ZATCA submission
+- Background processing via scheduled actions (ir.cron)
 - Optimized for high-volume retail environments
 
     """,
@@ -37,7 +37,6 @@ Technical Implementation:
         'point_of_sale',
         'l10n_sa_pos',
         'l10n_sa_edi',
-        'queue_job',  # For background processing
     ],
     'data': [
         'security/ir.model.access.csv',
