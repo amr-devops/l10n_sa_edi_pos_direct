@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saudi Arabia - POS Direct ZATCA Integration</title>
+</head>
+<body>
+
+<section class="oe_container">
+  <div class="row mt-3">
+    <div class="col-12 text-right">
+      <span class="badge badge-success m-2">✨ 70% Faster</span>
+      <span class="badge badge-primary m-2">🚀 Phase 2 Compliant</span>
+      <span class="badge badge-info m-2">⚡ Async Processing</span>
+      <span class="badge badge-dark m-2">🔒 Secure</span>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12 text-center">
+      <h1 class="display-4">🇸🇦 ZATCA Direct POS Integration</h1>
+      <p class="lead">Enhanced Saudi Arabia E-Invoicing Phase 2 for Point of Sale</p>
+    </div>
+  </div>
+</section>
+
+<!-- Overview Section -->
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12">
+      <h2><i class="fa fa-bullseye"></i> Overview</h2>
+      <p class="lead">
+        An optimized replacement for the standard <code>l10n_sa_edi_pos</code> module, providing 
+        direct ZATCA integration with significant performance improvements and enhanced functionality 
+        designed specifically for high-volume retail environments in Saudi Arabia.
+      </p>
+      <p>
+        This module eliminates the need for customer data entry in cash transactions, removes unnecessary PDF generation, 
+        and provides true Phase 2 QR code compliance with digital signatures and async reporting.
+      </p>
+      
+      <h3>نظرة عامة</h3>
+      <p>
+        موديول محسن بديل عن <code>l10n_sa_edi_pos</code> الافتراضي، يوفر تكامل مباشر مع هيئة الزكاة والضريبة 
+        مع تحسينات كبيرة في الأداء ووظائف محسنة مصممة خصيصاً لبيئات التجزئة عالية الحجم في المملكة العربية السعودية.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Performance Stats -->
+<section class="oe_container">
+  <div class="row oe_spaced text-center">
+    <div class="col-md-3 col-6">
+      <h3 class="text-danger">70%</h3>
+      <p>Faster Processing</p>
+    </div>
+    <div class="col-md-3 col-6">
+      <h3 class="text-success">100%</h3>
+      <p>Phase 2 Compliant</p>
+    </div>
+    <div class="col-md-3 col-6">
+      <h3 class="text-info">24h</h3>
+      <p>Async Reporting</p>
+    </div>
+    <div class="col-md-3 col-6">
+      <h3 class="text-primary">0</h3>
+      <p>PDF Generation</p>
+    </div>
+  </div>
+</section>
+
+<!-- Feature Comparison -->
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12">
+      <h2><i class="fa fa-exchange"></i> Module Comparison</h2>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+          <thead class="thead-dark">
+            <tr>
+              <th>Feature</th>
+              <th>l10n_sa_edi_pos (Standard)</th>
+              <th>l10n_sa_edi_pos_direct (Enhanced)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Customer Data Requirement</strong></td>
+              <td>
+                <span class="badge badge-danger">❌</span> Requires full customer data for every POS transaction<br>
+                <small class="text-muted">يتطلب بيانات العميل كاملة مع كل عملية</small>
+              </td>
+              <td>
+                <span class="badge badge-success">✅</span> Cash customer support (no customer data needed)<br>
+                <small class="text-muted">دعم العميل النقدي (لا يتطلب بيانات العميل)</small>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>PDF Generation</strong></td>
+              <td>
+                <span class="badge badge-danger">❌</span> Creates A4 PDF invoice for every POS order<br>
+                <small class="text-muted">ينشئ فاتورة PDF مع كل طلب</small>
+              </td>
+              <td>
+                <span class="badge badge-success">✅</span> No PDF generation - POS receipts only<br>
+                <small class="text-muted">لا ينشئ PDF - إيصالات نقاط البيع فقط</small>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Database Load</strong></td>
+              <td>
+                <span class="badge badge-danger">❌</span> Heavy database connection with every transaction<br>
+                <small class="text-muted">يتطلب الاتصال بقاعدة البيانات مع كل عملية</small>
+              </td>
+              <td>
+                <span class="badge badge-success">✅</span> Minimal database impact - frontend processing<br>
+                <small class="text-muted">تأثير قليل على قاعدة البيانات - معالجة على واجهة نقاط البيع فقط</small>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>QR Code Compliance</strong></td>
+              <td>
+                <span class="badge badge-warning">⚠️</span> Basic Phase 1 (only 5 fields)<br>
+                <small class="text-muted">رمز QR بالمرحلة الأولى الأساسية (5 حقول فقط)</small>
+              </td>
+              <td>
+                <span class="badge badge-success">✅</span> Full Phase 2 (9 fields + digital signatures)<br>
+                <small class="text-muted">رمز QR بالمرحلة الثانية كاملة (9 حقول + توقيعات رقمية)</small>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>ZATCA Synchronization</strong></td>
+              <td>
+                <span class="badge badge-danger">❌</span> Immediate sync required (not required for simplified)<br>
+                <small class="text-muted">مزامنة فورية مطلوبة (غير مطلوبة للمبسطة)</small>
+              </td>
+              <td>
+                <span class="badge badge-success">✅</span> Compliant 24-hour async reporting<br>
+                <small class="text-muted">تقارير غير متزامنة خلال 24 ساعة حسب اللوائح</small>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Record Duplication</strong></td>
+              <td>
+                <span class="badge badge-danger">❌</span> POS Order + Account Invoice (double records)<br>
+                <small class="text-muted">طلب نقاط البيع + فاتورة محاسبية (سجلات مضاعفة)</small>
+              </td>
+              <td>
+                <span class="badge badge-success">✅</span> Single POS record - no duplication<br>
+                <small class="text-muted">سجل نقاط البيع واحد - لا تكرار</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Features -->
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12">
+      <h2><i class="fa fa-star"></i> Key Features</h2>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fa fa-user-times text-success"></i> Cash Customer Support</h5>
+          <p class="card-text">No customer data required for cash transactions, streamlining the POS workflow.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fa fa-qrcode text-primary"></i> Full Phase 2 QR Codes</h5>
+          <p class="card-text">Complete ZATCA Phase 2 compliance with 9-field QR codes and digital signatures.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fa fa-clock-o text-info"></i> Async Processing</h5>
+          <p class="card-text">24-hour compliant async reporting without blocking POS operations.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fa fa-database text-warning"></i> Minimal Database Load</h5>
+          <p class="card-text">Frontend processing reduces database connections and improves performance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Installation -->
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12">
+      <h2><i class="fa fa-download"></i> Installation & Configuration</h2>
+      <div class="alert alert-warning">
+        <strong>Important:</strong> This module replaces the standard <code>l10n_sa_edi_pos</code> module. 
+        Uninstall the standard module before installing this enhanced version.
+      </div>
+      
+      <h4>Step 1: Remove Standard Module</h4>
+      <p>Uninstall the existing <code>l10n_sa_edi_pos</code> module from your system to avoid conflicts.</p>
+      
+      <h4>Step 2: Install Enhanced Module</h4>
+      <p>Install <code>l10n_sa_edi_pos_direct</code> through the Apps menu or via command line.</p>
+      
+      <h4>Step 3: Verify Configuration</h4>
+      <p>Ensure your ZATCA certificate is properly configured in the invoice journal settings.</p>
+      
+      <h4>Step 4: Enable Direct Mode</h4>
+      <p>Navigate to POS Configuration and enable "ZATCA Direct Mode" for your point of sale.</p>
+      
+      <h4>Step 5: Test Transactions</h4>
+      <p>Perform test transactions to verify QR code generation and ZATCA submission workflow.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Changelog -->
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12">
+      <h2><i class="fa fa-code-fork"></i> Changelog</h2>
+      <div class="border rounded p-3">
+        <ul class="list-unstyled">
+          <li class="mb-4">
+            <div class="h5 mb-2">
+              <span class="font-weight-bold bg-dark text-white rounded py-1 px-3">18.0.1.3.0</span>
+              <span class="text-muted ml-2">29-08-2025</span>
+            </div>
+            <ul class="mt-2">
+              <li class="mx-3"><small><strong>🔧 Enhanced QR Code Integration:</strong> Improved override of compute_sa_qr_code method to properly use l10n_sa_pos functions</small></li>
+              <li class="mx-3"><small><strong>🚀 Code Optimization:</strong> Removed redundant QR generation methods and streamlined date formatting</small></li>
+            </ul>
+          </li>
+          
+          <li class="mb-4">
+            <div class="h5 mb-2">
+              <span class="font-weight-bold bg-dark text-white rounded py-1 px-3">18.0.1.2.0</span>
+              <span class="text-muted ml-2">22-08-2025</span>
+            </div>
+            <ul class="mt-2">
+              <li class="mx-3"><small><strong>🔧 Fixed Arabic Character Encoding:</strong> Resolved btoa() InvalidCharacterError when using Arabic language interface</small></li>
+              <li class="mx-3"><small><strong>🛡️ Improved Unicode Support:</strong> Enhanced base64 encoding for ZATCA compliance with Arabic text</small></li>
+            </ul>
+          </li>
+          
+          <li class="mb-4">
+            <div class="h5 mb-2">
+              <span class="font-weight-bold bg-dark text-white rounded py-1 px-3">18.0.1.1.0</span>
+              <span class="text-muted ml-2">20-08-2025</span>
+            </div>
+            <ul class="mt-2">
+              <li class="mx-3"><small><strong>✅ Added ZATCA Refund Features:</strong> Interactive refund reason popup with 6 predefined codes and full ZATCA compliance (BR-KSA-17, BR-KSA-F-04)</small></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GitHub Repository -->
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12">
+      <h2><i class="fa fa-github"></i> GitHub Repository</h2>
+      <p>
+        This module is open source and available on GitHub. Contributions and feedback are welcome.
+      </p>
+      <p>
+        هذا الموديول مفتوح المصدر ومتاح على GitHub. المساهمات والملاحظات مرحب بها.
+      </p>
+      <p>
+        https://github.com/amr-devops/l10n_sa_edi_pos_direct/tree/18.0
+      </p>
+      
+    </div>
+  </div>
+</section>
+
+<!-- Support -->
+<section class="oe_container">
+  <div class="row oe_spaced">
+    <div class="col-12">
+      <h2><i class="fa fa-support"></i> Support & Contact</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Author Information</h4>
+          <ul class="list-unstyled">
+            <li><strong>Author:</strong> EasyERPS, AMR Hawsawi</li>
+            <li><strong>License:</strong> LGPL-3</li>
+            <li><strong>Website:</strong> <a href="https://easyerps.com" target="_blank">https://easyerps.com</a></li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h4>Target Market</h4>
+          <p>
+            This module is designed for <strong>Saudi Arabian businesses</strong> requiring 
+            <strong>high-performance ZATCA compliance</strong> in retail environments.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
