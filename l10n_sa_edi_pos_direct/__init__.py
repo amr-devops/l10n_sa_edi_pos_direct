@@ -8,7 +8,7 @@ def post_init_hook(env):
     Post-installation hook to configure ZATCA settings for POS
     """
     # Enable direct mode for Saudi companies
-    saudi_companies = env['res.company'].search([('country_id.code', '=', 'SA')])
+    saudi_companies = env['res.company'].search([('partner_id.country_id.code', '=', 'SA')])
     for company in saudi_companies:
         # Enable direct ZATCA mode
         env['ir.config_parameter'].sudo().set_param(

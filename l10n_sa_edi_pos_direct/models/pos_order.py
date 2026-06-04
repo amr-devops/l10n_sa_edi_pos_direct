@@ -289,6 +289,17 @@ class PosOrder(models.Model):
             # Submit to ZATCA Reporting API (for simplified invoices)
             result = self._submit_to_zatca_reporting_api(journal, xml_content)
             
+            # Check for "already submitted" case (409 with REPORTED_SUCCESSFULLY_EARLIER)
+            # This happens when concurrent cron runs submit the same invoice
+            if result.get('error') and result.get('status_code') == 409:
+                error_text = str(result.get('error', ''))
+                if 'REPORTED_SUCCESSFULLY_EARLIER' in error_text or 'Previously Submitted' in error_text:
+                    self.l10n_sa_zatca_status = 'submitted'
+                    self.l10n_sa_zatca_submission_time = fields.Datetime.now()
+                    self.l10n_sa_zatca_error_message = False
+                    _logger.info(f"ZATCA: Order {self.name} was already submitted successfully (409)")
+                    return
+            
             # Process the result - handle both success and 400 (rejected) cases
             if not result.get('error'):
                 # Success case - no errors
@@ -363,6 +374,39 @@ class PosOrder(models.Model):
                 except Exception as e:
                     _logger.error(f"ZATCA: Manual retry failed for order {order.name}: {e}")
                     raise UserError(_("Failed to retry ZATCA submission for order %s: %s") % (order.name, str(e)))
+
+    def action_regenerate_uuid(self):
+        """Regenerate UUID for order and reset ZATCA status to trigger resubmission"""
+        self.ensure_one()
+        
+        # Store old UUID for logging
+        old_uuid = self.uuid
+        
+        # Generate new UUID
+        new_uuid = str(uuid.uuid4())
+        
+        # Update order with new UUID and reset ZATCA status
+        self.write({
+            'uuid': new_uuid,
+            'l10n_sa_zatca_status': 'queued',
+            'l10n_sa_zatca_error_message': False,
+            'l10n_sa_zatca_submission_time': False,
+        })
+        
+        # Log the UUID regeneration
+        _logger.info(f"ZATCA: UUID regenerated for order {self.name} - Old: {old_uuid}, New: {new_uuid}")
+        
+        # Return success notification
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('UUID Regenerated'),
+                'message': _('UUID successfully regenerated for order %s.\n\nOld UUID: %s\nNew UUID: %s\n\nThe order has been queued for ZATCA submission.') % (self.name, old_uuid or 'None', new_uuid),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
     
     def action_sync_all_pending_zatca(self):
         """Manual action to sync all pending ZATCA orders immediately"""
@@ -389,6 +433,55 @@ class PosOrder(models.Model):
                     'sticky': True,
                 }
             }
+
+    def action_sync_selected_zatca(self):
+        """Sync ZATCA for selected orders only"""
+        orders_to_process = self.filtered(
+            lambda o: o.l10n_sa_zatca_status in ['queued', 'error'] and o.uuid
+        )
+        
+        if not orders_to_process:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('ZATCA Sync'),
+                    'message': _('No orders to process. Select orders with status Queued or Error.'),
+                    'type': 'warning',
+                    'sticky': False,
+                }
+            }
+        
+        success_count = 0
+        error_count = 0
+        
+        for order in orders_to_process:
+            try:
+                order.submit_to_zatca_reporting()
+                if order.l10n_sa_zatca_status == 'submitted':
+                    success_count += 1
+                else:
+                    error_count += 1
+                self.env.cr.commit()
+            except Exception as e:
+                error_count += 1
+                order.l10n_sa_zatca_status = 'error'
+                order.l10n_sa_zatca_error_message = str(e)
+                self.env.cr.commit()
+                _logger.error(f"ZATCA: Error syncing selected order {order.name}: {e}")
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('ZATCA Sync Complete'),
+                'message': _('Processed %s orders: %s success, %s errors') % (
+                    len(orders_to_process), success_count, error_count
+                ),
+                'type': 'success' if error_count == 0 else 'warning',
+                'sticky': False,
+            }
+        }
 
     def _generate_simplified_invoice_xml(self):
         """Generate simplified invoice XML for ZATCA submission"""
@@ -739,7 +832,7 @@ class PosOrder(models.Model):
         """Batch submit all pending ZATCA orders - called by cron job"""
         pending_orders = self.search([
             ('l10n_sa_zatca_status', '=', 'queued'),
-            ('company_id.country_id.code', '=', 'SA'),
+            ('company_id.partner_id.country_id.code', '=', 'SA'),
             ('l10n_sa_zatca_status', '!=', 'legacy')  # Exclude legacy orders
         ])
         
@@ -759,8 +852,13 @@ class PosOrder(models.Model):
                     success_count += 1
                 else:
                     error_count += 1
+                # Commit after each order to persist status
+                self.env.cr.commit()
             except Exception as e:
                 error_count += 1
+                order.l10n_sa_zatca_status = 'error'
+                order.l10n_sa_zatca_error_message = str(e)
+                self.env.cr.commit()
                 _logger.error(f"ZATCA: Error processing order {order.name}: {e}")
         
         _logger.info(f"ZATCA: Batch submission complete - {success_count} success, {error_count} errors")
@@ -770,7 +868,7 @@ class PosOrder(models.Model):
         """Cron job to automatically retry failed ZATCA submissions"""
         failed_orders = self.search([
             ('l10n_sa_zatca_status', '=', 'error'),
-            ('company_id.country_id.code', '=', 'SA'),
+            ('company_id.partner_id.country_id.code', '=', 'SA'),
             ('uuid', '!=', False),
             ('l10n_sa_zatca_status', '!=', 'legacy'),  # Exclude legacy orders
             ('create_date', '>=', fields.Datetime.now() - timedelta(days=7))  # Only retry within 7 days

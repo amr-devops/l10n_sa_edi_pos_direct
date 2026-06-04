@@ -35,6 +35,12 @@
                             type="object"
                             class="btn-secondary"
                             invisible="l10n_sa_zatca_status not in ['error', 'queued']"/>
+                    <!-- <button name="action_regenerate_uuid" 
+                            string="Regenerate UUID" 
+                            type="object"
+                            class="btn-warning"
+                            confirm="Are you sure you want to regenerate the UUID? This will generate a new UUID, reset ZATCA status to 'Queued', clear error messages, and trigger resubmission to ZATCA. This action cannot be undone."
+                            invisible="l10n_sa_zatca_status not in ['error', 'queued']"/> -->
                 </xpath>
             </field>
         </record>
@@ -102,7 +108,7 @@
                   action="action_pos_order_zatca"
                   sequence="15"/>
 
-        <!-- Server Action for ZATCA Sync -->
+        <!-- Server Action for ZATCA Sync (All Pending) -->
         <record id="action_zatca_sync_all_pending" model="ir.actions.server">
             <field name="name">🔄 Sync All Pending ZATCA Orders</field>
             <field name="model_id" ref="point_of_sale.model_pos_order"/>
@@ -111,6 +117,18 @@
             <field name="state">code</field>
             <field name="code">
 action = model.action_sync_all_pending_zatca()
+            </field>
+        </record>
+
+        <!-- Server Action for Selected Orders ZATCA Sync -->
+        <record id="action_zatca_sync_selected" model="ir.actions.server">
+            <field name="name">🔄 Sync Selected ZATCA Orders</field>
+            <field name="model_id" ref="point_of_sale.model_pos_order"/>
+            <field name="binding_model_id" ref="point_of_sale.model_pos_order"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+action = records.action_sync_selected_zatca()
             </field>
         </record>
 
