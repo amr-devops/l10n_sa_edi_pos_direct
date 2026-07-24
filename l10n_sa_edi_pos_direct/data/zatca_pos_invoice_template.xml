@@ -135,6 +135,24 @@
                     <cbc:PaymentID t-esc="invoice_data['invoice_number']"/>
                 </cac:PaymentMeans>
 
+                <!-- Document-level allowances (global discounts / promo products)
+                     Matches l10n_sa_edi: negative lines → AllowanceCharge reason 95, not InvoiceLine (BR-KSA-F-04) -->
+                <t t-foreach="invoice_data.get('allowance_charge_vals', [])" t-as="allowance">
+                    <cac:AllowanceCharge>
+                        <cbc:ChargeIndicator t-esc="allowance['charge_indicator']"/>
+                        <cbc:AllowanceChargeReasonCode t-esc="allowance['allowance_charge_reason_code']"/>
+                        <cbc:AllowanceChargeReason t-esc="allowance['allowance_charge_reason']"/>
+                        <cbc:Amount currencyID="SAR" t-esc="'%.2f' % allowance['amount']"/>
+                        <cac:TaxCategory>
+                            <cbc:ID>S</cbc:ID>
+                            <cbc:Percent t-esc="'%.2f' % allowance.get('tax_rate', 15.0)"/>
+                            <cac:TaxScheme>
+                                <cbc:ID>VAT</cbc:ID>
+                            </cac:TaxScheme>
+                        </cac:TaxCategory>
+                    </cac:AllowanceCharge>
+                </t>
+
                 <!-- Tax Total for entire invoice (BR-KSA-EN16931-09: only one tax total without subtotals) -->
                 <cac:TaxTotal>
                     <cbc:TaxAmount currencyID="SAR" t-esc="'%.2f' % invoice_data['total_tax']"/>
@@ -156,11 +174,12 @@
                     </cac:TaxSubtotal>
                 </cac:TaxTotal>
 
-                <!-- Legal Monetary Total -->
+                <!-- Legal Monetary Total (EN16931: LineExtension − AllowanceTotal = TaxExclusive) -->
                 <cac:LegalMonetaryTotal>
-                    <cbc:LineExtensionAmount currencyID="SAR" t-esc="'%.2f' % invoice_data['total_without_tax']"/>
+                    <cbc:LineExtensionAmount currencyID="SAR" t-esc="'%.2f' % invoice_data.get('line_extension_amount', invoice_data['total_without_tax'])"/>
                     <cbc:TaxExclusiveAmount currencyID="SAR" t-esc="'%.2f' % invoice_data['total_without_tax']"/>
                     <cbc:TaxInclusiveAmount currencyID="SAR" t-esc="'%.2f' % invoice_data['total_with_tax']"/>
+                    <cbc:AllowanceTotalAmount t-if="invoice_data.get('allowance_total_amount')" currencyID="SAR" t-esc="'%.2f' % invoice_data['allowance_total_amount']"/>
                     <cbc:PayableAmount currencyID="SAR" t-esc="'%.2f' % invoice_data['total_with_tax']"/>
                 </cac:LegalMonetaryTotal>
 

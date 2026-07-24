@@ -33,6 +33,13 @@ An optimized replacement for the standard `l10n_sa_edi_pos` module, providing di
 
 ## Changelog
 
+### Version 18.0.1.3.3
+🐛 **Fixed BR-KSA-F-04 on Discount Lines:** Negative promo/discount product lines are no longer sent as InvoiceLine; they become document-level AllowanceCharge (reason code 95), matching official `l10n_sa_edi`  
+📄 **XML Monetary Totals:** Added AllowanceTotalAmount and correct LineExtension − Allowance = TaxExclusive calculation using untaxed subtotals
+
+### Version 18.0.1.3.2
+🐛 **Fixed Cron Search Error:** ZATCA cron jobs now filter companies via the stored `partner_id.country_id` path, removing the "Non-stored field res.company.country_id cannot be searched" error
+
 ### Version 18.0.1.3.0
 🔧 **Enhanced QR Code Integration:** Improved override of compute_sa_qr_code method to properly use l10n_sa_pos functions  
 🚀 **Code Optimization:** Removed redundant QR generation methods and streamlined date formatting

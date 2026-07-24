@@ -128,6 +128,14 @@ class PosOrder(models.Model):
         """Check if this is a refund order (has refunded_order_id or negative amount)"""
         return bool(self.refunded_order_id) or self.amount_total < 0
 
+    def _is_global_discount_line(self, line):
+        """
+        Negative POS lines (promo/discount products) are document-level allowances
+        for ZATCA (same rule as l10n_sa_edi account.move.line._is_global_discount_line).
+        BR-KSA-F-04 forbids negative InvoiceLine amounts.
+        """
+        return float(line.price_subtotal) < 0 and not self._is_refund_order()
+
     def _validate_refund_reason_for_zatca(self):
         """
         Validate refund reason for ZATCA compliance (simplified for direct mode)
@@ -529,12 +537,15 @@ class PosOrder(models.Model):
                     'name': self.partner_id.name if self.partner_id else 'عميل نقدي',  # Cash Customer in Arabic
                 },
                 'lines': [],
+                'allowance_charge_vals': [],
             }
             
             # Process order lines
+            # Negative promo/discount lines → document AllowanceCharge (l10n_sa_edi pattern), not InvoiceLine
             line_number = 1
             total_lines_without_tax = 0.0
             total_calculated_tax = 0.0
+            allowance_total_amount = 0.0
             for line in self.lines:
                 # Calculate tax rate from actual taxes on the line
                 tax_rate = 0.0
@@ -543,18 +554,31 @@ class PosOrder(models.Model):
                 else:
                     # No taxes on this line
                     tax_rate = 0.0
-                
-                # ZATCA BR-KSA-EN16931-11: Line net amount = (Quantity * (Unit Price / Base Quantity)) + Charges - Allowances
-                # For POS orders: no charges/allowances, so: Line net amount = Quantity * Unit Price
-                quantity = float(line.qty)
-                unit_price = float(line.price_unit)
-                base_quantity = 1.000000
-                
-                # Calculate using ZATCA formula with proper rounding
-                calculated_line_amount = quantity * (unit_price / base_quantity)
-                # Round to 2 decimal places for currency consistency
-                line_total_without_tax = round(calculated_line_amount, 2)
+
+                # Untaxed amounts (ZATCA LineExtension / allowance base) — same as l10n_sa_edi
+                line_total_without_tax = round(float(line.price_subtotal), 2)
                 line_total_with_tax = float(line.price_subtotal_incl)
+                quantity = float(line.qty)
+                base_quantity = 1.000000
+                unit_price = (
+                    round(line_total_without_tax / quantity, 6)
+                    if quantity else float(line.price_unit)
+                )
+
+                # Global discount product: document-level allowance (BR-KSA-F-04)
+                if self._is_global_discount_line(line):
+                    allowance_amount = abs(line_total_without_tax)
+                    allowance_total_amount += allowance_amount
+                    invoice_data['allowance_charge_vals'].append({
+                        'charge_indicator': 'false',
+                        'allowance_charge_reason_code': '95',
+                        'allowance_charge_reason': 'Discount',
+                        'amount': allowance_amount,
+                        'tax_rate': tax_rate,
+                    })
+                    # Tax on allowance reduces document tax total (net taxable base)
+                    total_calculated_tax -= round(allowance_amount * (tax_rate / 100), 2)
+                    continue
                 
                 # CRITICAL: ZATCA BR-KSA-F-04 - All amounts must be positive for credit notes
                 if self._is_refund_order():
@@ -586,11 +610,20 @@ class PosOrder(models.Model):
                 total_lines_without_tax += line_total_without_tax
                 line_number += 1
             
-            # Ensure consistency between line totals and invoice totals (BR-S-08, BR-CO-10)
-            invoice_data['total_without_tax'] = abs(total_lines_without_tax) if self._is_refund_order() else total_lines_without_tax
-            # ZATCA BR-CO-17 & BR-S-09: Use dynamically calculated tax total from actual line taxes
-            invoice_data['total_tax'] = round(abs(total_calculated_tax) if self._is_refund_order() else total_calculated_tax, 2)
-            invoice_data['total_with_tax'] = round(abs(total_lines_without_tax + total_calculated_tax) if self._is_refund_order() else (total_lines_without_tax + total_calculated_tax), 2)
+            # EN16931 / ZATCA monetary totals:
+            # LineExtension = sum of positive InvoiceLines
+            # AllowanceTotal = document discounts
+            # TaxExclusive = LineExtension - AllowanceTotal
+            line_extension_amount = abs(total_lines_without_tax) if self._is_refund_order() else total_lines_without_tax
+            tax_exclusive_amount = round(line_extension_amount - allowance_total_amount, 2)
+            total_tax = round(abs(total_calculated_tax) if self._is_refund_order() else total_calculated_tax, 2)
+            tax_inclusive_amount = round(tax_exclusive_amount + total_tax, 2)
+
+            invoice_data['line_extension_amount'] = line_extension_amount
+            invoice_data['allowance_total_amount'] = round(allowance_total_amount, 2)
+            invoice_data['total_without_tax'] = tax_exclusive_amount
+            invoice_data['total_tax'] = total_tax
+            invoice_data['total_with_tax'] = tax_inclusive_amount
             
             # Render XML using our ZATCA-compliant template
             xml_markup = self.env['ir.qweb']._render(
